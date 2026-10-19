@@ -33,7 +33,8 @@ export async function sendMail(to: string, subject: string, text: string, opts: 
     html: toHtml(text, cid),
     ...(opts.image ? { attachments: [{ filename: `maquette.${ext}`, content: opts.image.data, contentType: opts.image.contentType, cid, contentDisposition: "inline" as const }] } : {}),
     ...(opts.inReplyTo ? { inReplyTo: opts.inReplyTo, references: opts.inReplyTo } : {}),
-    headers: { "List-Unsubscribe": `<mailto:${process.env.MAIL_USER}?subject=STOP>` },
+    // Pas d'en-tête « List-Unsubscribe » : c'est un signal d'envoi de masse qui pousse Gmail à classer en Promotions.
+    // Les demandes d'arrêt sont détectées dans les réponses (classement « ne plus contacter »).
   });
   return info.messageId;
 }
