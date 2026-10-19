@@ -1,4 +1,4 @@
--- SO by ZEMA TECHNOLOGIES — schéma de la semaine 1 (prospection)
+-- SŌ by ZEMA TECHNOLOGIES — schéma de la semaine 1 (prospection)
 -- À exécuter dans Supabase : SQL Editor > New query > coller > Run.
 
 create extension if not exists "pgcrypto";

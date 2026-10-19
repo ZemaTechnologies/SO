@@ -2,7 +2,7 @@
   "name": "so",
   "version": "0.1.0",
   "private": true,
-  "description": "SO by ZEMA TECHNOLOGIES — AI Growth Agent",
+  "description": "SŌ by ZEMA TECHNOLOGIES — AI Growth Agent",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

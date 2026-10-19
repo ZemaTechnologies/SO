@@ -57,5 +57,24 @@ export type Message = {
   sent_at: string | null;
   approved_at: string | null;
   error: string | null;
+  image_path: string | null;
   created_at: string;
 };
+
+/* Images des e-mails (maquettes), dans le stockage privé Supabase « mockups ». */
+const BUCKET = "mockups";
+
+export async function saveImage(path: string, data: Buffer, contentType: string): Promise<void> {
+  const { error } = await db().storage.from(BUCKET).upload(path, data, { contentType, upsert: true });
+  if (error) throw new Error(`Stockage de l'image impossible : ${error.message}`);
+}
+
+export async function loadImage(path: string): Promise<{ data: Buffer; contentType: string } | null> {
+  const { data, error } = await db().storage.from(BUCKET).download(path);
+  if (error || !data) return null;
+  return { data: Buffer.from(await data.arrayBuffer()), contentType: data.type || "image/png" };
+}
+
+export async function removeImage(path: string): Promise<void> {
+  await db().storage.from(BUCKET).remove([path]);
+}

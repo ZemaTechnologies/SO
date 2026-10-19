@@ -1,8 +1,8 @@
-# SO by ZEMA TECHNOLOGIES — AI Growth Agent
+# SŌ by ZEMA TECHNOLOGIES — AI Growth Agent
 
 Version 1, semaine 1 : prospection.
 
-## Ce que fait SO
+## Ce que fait SŌ
 
 1. **Trouver** : recherche d'entreprises par secteur et commune (Google Maps).
 2. **Analyser** : site web (HTTPS, mobile, vitesse, WhatsApp, formulaire, CTA, SEO, réseaux), opportunité ZEMA, score sur 100.

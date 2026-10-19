@@ -61,7 +61,7 @@ export default async function ProspectPage({ params }: { params: Promise<{ id: s
         <div className="card">
           <p><strong>Premier e-mail à valider</strong> — destinataire : {p.email}</p>
           {preview && <p>Aperçu personnalisé : <a href={`/p/${preview.slug}`} target="_blank">ouvrir</a></p>}
-          <MessageEditor id={draft.id} subject={draft.subject ?? ""} body={draft.body} />
+          <MessageEditor id={draft.id} subject={draft.subject ?? ""} body={draft.body} hasImage={!!draft.image_path} />
         </div>
       ) : (
         <div className="card row">

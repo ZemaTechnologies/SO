@@ -29,7 +29,7 @@ export function ActionButton(props: { url: string; body?: unknown; label: string
 
 function summarize(d: Record<string, any>): string {
   if (d.created !== undefined) return `${d.created} nouveau(x) prospect(s), ${d.skipped} déjà connu(s)`;
-  if (d.previewUrl) return "Aperçu et e-mail préparés";
+  if (d.previewUrl) return d.mockup ? "Aperçu, e-mail et maquette préparés" : "Aperçu et e-mail préparés (maquette non générée : voir l'historique)";
   if (d.score !== undefined) return `Score ${d.score}/100`;
   const parts: string[] = [];
   if (d.send) parts.push(`${d.send.sent} envoyé(s), ${d.send.failed} échec(s)`);

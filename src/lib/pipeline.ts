@@ -1,11 +1,12 @@
 import "server-only";
 import { randomBytes } from "node:crypto";
-import { db, type Prospect } from "./supabase";
+import { db, saveImage, loadImage, type Prospect } from "./supabase";
 import { knowledge } from "./knowledge";
 import { searchPlaces, buildQuery, guessDistrict, SECTOR_QUERIES } from "./places";
 import { analyzeSite, type SiteAnalysis } from "./analyze-site";
 import { detectOpportunity, scoreProspect } from "./score";
-import { draftEmail, draftPreview, classifyReply } from "./ai";
+import { draftEmail, draftPreview, draftMockup, classifyReply } from "./ai";
+import { renderMockup, mockupLayoutFor } from "./mockup";
 import { sendMail } from "./mailer";
 import { fetchUnread } from "./inbox";
 
@@ -134,6 +135,7 @@ export async function prepareOutreach(id: string) {
     company: p.company, sector: p.sector ?? undefined, district: p.district ?? undefined,
     decisionMaker: p.decision_maker ?? undefined, decisionMakerRole: p.decision_maker_role ?? undefined,
     website: p.website ?? undefined, site, opportunity,
+    googleReviews: Number(p.score_details?.avis_google ?? 0) || undefined,
   };
 
   const preview = await draftPreview(kb, base);
@@ -143,9 +145,25 @@ export async function prepareOutreach(id: string) {
 
   const mail = await draftEmail(kb, { ...base, previewUrl }, 0);
   await db().from("messages").delete().eq("prospect_id", id).eq("status", "brouillon");
-  await db().from("messages").insert({ prospect_id: id, step: 0, subject: mail.subject, body: mail.body, status: "brouillon" });
-  await log(id, "note", "Aperçu et premier e-mail préparés, en attente de validation");
-  return { previewUrl };
+  const { data: msg } = await db().from("messages")
+    .insert({ prospect_id: id, step: 0, subject: mail.subject, body: mail.body, status: "brouillon" }).select("id").single();
+
+  // Maquette en image, insérée en bas du premier e-mail (remplaçable par Michael avant validation)
+  let mockup = false;
+  if (msg) {
+    try {
+      const content = await draftMockup(kb, base, mockupLayoutFor(p.main_opportunity));
+      const png = await renderMockup(content);
+      const path = `${msg.id}-${Date.now()}.png`;
+      await saveImage(path, png, "image/png");
+      await db().from("messages").update({ image_path: path }).eq("id", msg.id);
+      mockup = true;
+    } catch (e) {
+      await log(id, "note", `Maquette non générée : ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+  await log(id, "note", `Aperçu, premier e-mail${mockup ? " et maquette" : ""} préparés, en attente de validation`);
+  return { previewUrl, mockup };
 }
 
 /** Validation par Michael : le message part au prochain envoi. */
@@ -179,7 +197,9 @@ export async function sendDue() {
     }
     if (m.step === 0) { if (budget <= 0) continue; budget--; }
     try {
-      const providerId = await sendMail(p.email, m.subject ?? `ZEMA TECHNOLOGIES — ${p.company}`, m.body);
+      const image = m.image_path ? await loadImage(m.image_path) : null;
+      if (m.image_path && !image) throw new Error("Image de la maquette introuvable dans le stockage");
+      const providerId = await sendMail(p.email, m.subject ?? `ZEMA TECHNOLOGIES — ${p.company}`, m.body, { image: image ?? undefined });
       await db().from("messages").update({ status: "envoye", sent_at: new Date().toISOString(), provider_message_id: providerId }).eq("id", m.id);
       const stage = m.step === 0 ? "contacte" : m.step === 1 ? "relance_1" : "relance_2";
       await db().from("prospects").update({ stage }).eq("id", p.id);
@@ -203,6 +223,7 @@ async function scheduleFollowUp(p: Prospect, step: 1 | 2, previousSubject: strin
     decisionMaker: p.decision_maker ?? undefined, website: p.website ?? undefined,
     site: site ?? (await analyzeSite(p.website ?? undefined)),
     opportunity: { offer: p.main_opportunity ?? "", reason: p.opportunity_reason ?? "" },
+    googleReviews: Number(p.score_details?.avis_google ?? 0) || undefined,
   }, step, (history ?? []).map((h) => h.body));
   await db().from("messages").insert({
     prospect_id: p.id, step,

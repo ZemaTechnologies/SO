@@ -1,6 +1,6 @@
-# Base de connaissance ZEMA — SO by ZEMA TECHNOLOGIES
+# Base de connaissance ZEMA — SŌ by ZEMA TECHNOLOGIES
 
-> Source unique de vérité pour tous les agents SO (prospection, contenu, rapports).
+> Source unique de vérité pour tous les agents SŌ (prospection, contenu, rapports).
 > À tenir à jour par Michael. Les éléments marqués **[À COMPLÉTER]** manquent encore.
 
 ## 1. Identité

@@ -4,7 +4,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="shell">
       <nav className="side">
-        <div className="brand">SO</div>
+        <div className="brand">SŌ</div>
         <div className="tag">by ZEMA TECHNOLOGIES</div>
         <Link href="/">Tableau de bord</Link>
         <Link href="/recherche">Trouver des prospects</Link>

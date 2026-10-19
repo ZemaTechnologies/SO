@@ -23,7 +23,7 @@ export default async function Messages() {
         {(drafts ?? []).map((m: any) => (
           <div className="card" key={m.id}>
             <p><Link href={`/prospects/${m.prospects.id}`}><strong>{m.prospects.company}</strong></Link> — {m.prospects.email} · score {m.prospects.score} · {m.prospects.main_opportunity}</p>
-            <MessageEditor id={m.id} subject={m.subject ?? ""} body={m.body} />
+            <MessageEditor id={m.id} subject={m.subject ?? ""} body={m.body} hasImage={!!m.image_path} />
           </div>
         ))}
       </div>
